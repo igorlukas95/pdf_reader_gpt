@@ -1,5 +1,6 @@
 from flask import Flask, request
-from PyPDF2 import PdfFileReader
+from flask import jsonify
+from PyPDF2 import PdfReader
 from werkzeug.utils import secure_filename
 import os
 
@@ -8,10 +9,10 @@ UPLOAD_FOLDER = "uploads"
 
 def extract_text_from_pdf(file_path):
     with open(file_path, "rb") as file:
-        pdf = PdfFileReader(file)
+        pdf = PdfReader(file)
         text = ""
-        for page in range(pdf.getNumPages()):
-            text += pdf.getPage(page).extractText()
+        for page in range(len(pdf.pages)):
+            text += pdf.pages[page].extract_text()
         return text
 
 extracted_texts = {}
@@ -28,6 +29,18 @@ def upload_file():
     file.save(file_path)
     extracted_texts[filename] = extract_text_from_pdf(file_path)
     return "File uploaded and text extracted successfully", 200
+
+@app.route("/download/<filename>", methods=["GET"])
+def download_file(filename):
+    if filename not in extracted_texts:
+        return "No such file", 404
+    return extracted_texts[filename], 200
+
+@app.route('/text/<filename>', methods=['GET'])
+def get_text(filename):
+    if filename not in extracted_texts:
+        return jsonify({"error": "File not found"}), 404
+    return jsonify({"text": extracted_texts[filename]})
 
 
 if __name__ == "__main__":

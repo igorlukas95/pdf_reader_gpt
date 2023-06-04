@@ -4,14 +4,30 @@ import axios from "axios";
 const Upload = () => {
     const [file, setFile] = useState(null);
 
-    const submitFile = () => {
-        const formData = new FormData();
-        formData.append("file", file);
+    const downloadFile = async (filename) => {
+        try {
+            const response = await axios.get(`/download/${filename}`);
+            console.log(response.data);
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
-        axios
-            .post("/upload", formData)
-            .then((response) => console.log(response))
-            .catch((error) => console.log(error));
+    const submitFile = async (event) => {
+        event.preventDefault();
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+            const response = await axios.post("/upload", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+            console.log(response.data);
+            downloadFile(file.name);
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     return (
