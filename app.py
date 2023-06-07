@@ -4,13 +4,15 @@ from PyPDF2 import PdfReader
 from werkzeug.utils import secure_filename
 from config import open_ai_key
 import os
-
 import openai
 
 openai.api_key = open_ai_key
 
 app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
+
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 def extract_text_from_pdf(file_path):
     with open(file_path, "rb") as file:
