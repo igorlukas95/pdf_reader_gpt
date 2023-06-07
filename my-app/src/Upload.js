@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
+import Answer from "./Answer";
 
 const Upload = () => {
     const [file, setFile] = useState(null);
+    const [answer, setAnswer] = useState("");
 
     const downloadFile = async (filename) => {
         try {
@@ -30,6 +32,18 @@ const Upload = () => {
         }
     };
 
+    const askQuestion = async (inputQuestion) => {
+        try {
+            const response = await axios.post("/question", {
+                question: inputQuestion,
+                filename: file.name,
+            });
+            setAnswer(response.data.answer);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     return (
         <div>
             <input
@@ -37,6 +51,11 @@ const Upload = () => {
                 onChange={(event) => setFile(event.target.files[0])}
             />
             <button onClick={submitFile}>Upload</button>
+
+            <input type="text" onChange={(event) => askQuestion(event.target.value)} />
+            <button onClick={() => askQuestion()}>Ask Question</button>
+
+            <Answer answer={answer} />
         </div>
     );
 };
